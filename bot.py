@@ -7,10 +7,13 @@ import datetime
 import numpy as np
 
 client = Client(config.API_KEY, config.API_SECRET, tld='com')
-symbolTicker = 'BTCBUSD'
+symbolTicker = config.SYMBOL
 symbolPrice = 0
 ma50 = 0
 auxPrice = 0.0
+buyQty = config.BUYQTY
+
+def
 
 def orderStatus(orderToCkeck):
     try:
@@ -67,6 +70,21 @@ def _ma50_():
 
     return ma50_local
 
+def _ma20_():
+    ma20_local = 0
+    sum = 0
+
+    klines = client.get_historical_klines(symbolTicker, Client.KLINE_INTERVAL_15MINUTE, "15 hour ago UTC")
+
+    if (len(klines) == 60):
+
+        for i in range(10,60):
+            sum = sum + float(klines[i][4])
+
+        ma20_local = sum / 20
+
+    return ma20_local
+
 while 1:
 
     time.sleep(3)
@@ -76,7 +94,7 @@ while 1:
     try:
         list_of_tickers = client.get_all_tickers()
     except Exception as e:
-        with open("ADABTC_scalper.txt", "a") as myfile:
+        with open("BTCBUSD_scalper.txt", "a") as myfile:
             myfile.write(str(datetime.datetime.now()) +" - an exception occured - {}".format(e)+ " Oops 1 ! \n")
         client = Client(config.API_KEY, config.API_SECRET, tld='com')
         continue
@@ -122,7 +140,7 @@ while 1:
                         symbol=symbolTicker,
                         side='BUY',
                         type='STOP_LOSS_LIMIT',
-                        quantity=400,
+                        quantity=buyQty,
                         price='{:.8f}'.format(round(symbolPrice*1.0055,8)),
                         stopPrice='{:.8f}'.format(round(symbolPrice*1.005,8)),
                         timeInForce='GTC')
@@ -163,7 +181,7 @@ while 1:
                                 symbol=symbolTicker,
                                 side='BUY',
                                 type='STOP_LOSS_LIMIT',
-                                quantity=400,
+                                quantity=buyQty,
                                 price='{:.8f}'.format(round(symbolPrice*1.0055,8)),
                                 stopPrice='{:.8f}'.format(round(symbolPrice*1.005,8)),
                                 timeInForce='GTC')
