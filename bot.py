@@ -13,8 +13,6 @@ ma50 = 0
 auxPrice = 0.0
 buyQty = config.BUYQTY
 
-def
-
 def orderStatus(orderToCkeck):
     try:
         status = client.get_order(
