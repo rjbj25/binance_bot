@@ -68,21 +68,6 @@ def _ma50_():
 
     return ma50_local
 
-def _ma20_():
-    ma20_local = 0
-    sum = 0
-
-    klines = client.get_historical_klines(symbolTicker, Client.KLINE_INTERVAL_15MINUTE, "15 hour ago UTC")
-
-    if (len(klines) == 60):
-
-        for i in range(10,60):
-            sum = sum + float(klines[i][4])
-
-        ma20_local = sum / 20
-
-    return ma20_local
-
 while 1:
 
     time.sleep(3)
