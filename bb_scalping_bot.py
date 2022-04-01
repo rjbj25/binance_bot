@@ -10,9 +10,6 @@ import talib as ta
 
 client = Client(config.API_KEY, config.API_SECRET, tld='com')
 symbolTicker = config.SYMBOL
-symbolPrice = 0
-ma50 = 0
-auxPrice = 0.0
 buyQty = config.BUYQTY
 
 def main():
@@ -91,7 +88,15 @@ def orderStatus(orderToCkeck):
         return 7
 
 def put_order():
-    pass
+    buyOrder = client.create_order(
+            symbol=symbolTicker,
+            side='BUY',
+            type='STOP_LOSS_LIMIT',
+            quantity=buyQty,
+            price='{:.8f}'.format(round(symbolPrice*1.0055,8)),
+            stopPrice='{:.8f}'.format(round(symbolPrice*1.005,8)),
+            timeInForce='GTC')
+    
 
 if __name__ == "__main__":
     main()
