@@ -15,7 +15,7 @@ from pyalgotrade.technical import bollinger
 
 class BBStrategy(strategy.BacktestingStrategy):
     def __init__(self, feed, instrument, smaPeriod):
-        super(BBStrategy, self).__init__(feed, cash_or_brk=100000)
+        super(BBStrategy, self).__init__(feed, cash_or_brk=1000)
         self.__position = None
         self.__instrument = instrument
         # We'll use adjusted close values instead of regular close values.
