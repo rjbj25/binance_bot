@@ -102,5 +102,3 @@ def put_order(price):
             timeInForce='GTC')
     
 
-if __name__ == "__main__":
-    main()
