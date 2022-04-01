@@ -17,11 +17,15 @@ def main():
         klines_15_min_20_periods = client.get_historical_klines(symbolTicker, Client.KLINE_INTERVAL_15MINUTE, f"15 hour ago UTC")
         klines_1min = client.get_historical_klines(symbolTicker, Client.KLINE_INTERVAL_1MINUTE, f"'1' minute ago UTC")
         bb_20_15min = _bb(klines_15_min_20_periods)
-        current_price = get_curren_price(klines_1min)
+        try:
+            current_price = get_curren_price(klines_1min)
+        except Exception as e:
+            print(e)
+            continue
         tendencia = get_tendencia()
-        print(f'La tendencia es {tendencia}')
-        print(f'Bandas de bollinger {bb_20_15min}')
-        print(f'Precio actual {current_price}')
+        print(f'***** La tendencia es {tendencia}')
+        print(f'***** Bandas de bollinger {bb_20_15min}')
+        print(f'***** Precio actual {current_price}')
         if  no_orders():
             if tendencia=='Ascendente':
                 if strategy_bb(bb_20_15min, current_price):
@@ -87,14 +91,14 @@ def orderStatus(orderToCkeck):
         print(e)
         return 7
 
-def put_order():
+def put_order(price):
     buyOrder = client.create_order(
             symbol=symbolTicker,
             side='BUY',
             type='STOP_LOSS_LIMIT',
             quantity=buyQty,
-            price='{:.8f}'.format(round(symbolPrice*1.0055,8)),
-            stopPrice='{:.8f}'.format(round(symbolPrice*1.005,8)),
+            price='{:.8f}'.format(round(price)),
+            stopPrice='{:.8f}'.format(round(price)),
             timeInForce='GTC')
     
 
