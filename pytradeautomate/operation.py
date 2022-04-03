@@ -10,11 +10,14 @@ class Operation:
         self.status = False
         self.__op_balance = 0
         self.buyPrice = 0
+        self.stop_price = None
 
 
     def buy(self, buyQty, buyPrice, bac_account):
         self.buyPrice = buyPrice
-        self.__op_balance = buyQty / buyPrice
+        
+        commision = buyQty * 0.001
+        self.__op_balance = (buyQty - commision) / buyPrice
         print(f'A Buy operation has been executed of {self.__symbol} at {buyPrice}')
         self.status = True
         bac_account.account_balance = bac_account.account_balance - buyQty
@@ -24,10 +27,10 @@ class Operation:
         self.__op_balance = 0
 
     def sell(self, sellQty, sellPrice, bac_account):
-        
+        commision = sellQty * 0.001
         account_balance = sellQty * sellPrice
         self.status = False
-        bac_account.account_balance = bac_account.account_balance + account_balance
+        bac_account.account_balance = bac_account.account_balance + account_balance - commision
         print(f'A Sell operation has been executed, new balance: {bac_account.account_balance}')
         self.__op_balance = 0
         return bac_account
