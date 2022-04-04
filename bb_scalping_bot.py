@@ -1,4 +1,4 @@
-import config
+import pytradeautomate.config as config
 from binance.client import Client
 from binance.enums import *
 import time

@@ -1,4 +1,4 @@
-import config
+import config as config
 from binance.client import Client
 import pandas as pd
 
