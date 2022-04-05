@@ -130,11 +130,11 @@ if __name__ == "__main__":
     interval = '5m'
     limit = 1000
     feed = fd(symbol=symbol, interval=interval, limit=limit)
-    feed.start_date = datetime.datetime.now() - datetime.timedelta(days=60)
-    feed.start_date = int(feed.start_date.timestamp()*1000)
-    feed.end_date = datetime.datetime.now() - datetime.timedelta(days=1)
-    feed.end_date = int(feed.end_date.timestamp()*1000)
-    st = Strategy(symbol, feed.get_Client(), feed.get_df_binance_klines_interval())
+    #feed.start_date = datetime.datetime.now() - datetime.timedelta(days=60)
+    #feed.start_date = int(feed.start_date.timestamp()*1000)
+    #feed.end_date = datetime.datetime.now() - datetime.timedelta(days=1)
+    #feed.end_date = int(feed.end_date.timestamp()*1000)
+    st = Strategy(symbol, feed.get_Client(), feed.get_df_binance_klines())
     st.backtestBB(20, 2, 0)
 
 
