@@ -1,6 +1,7 @@
 import config as config
 from binance.client import Client
 import pandas as pd
+import yfinance as yf
 
 class Feed:
     def __init__(self, symbol, interval, limit):
@@ -10,8 +11,10 @@ class Feed:
         self.end_date = None
         self.symbol = symbol
         self.interval = interval
+        self.ysymbol = None
+        self.yfinance_data = None
 
-    def get_df_klines(self):
+    def get_df_binance_klines(self):
         return pd.DataFrame(self.__klines)
 
     def get_Client(self):
@@ -20,5 +23,8 @@ class Feed:
     def to_csv(self, filename):
         self.__df_klines.to_csv(filename)
 
-    def get_df_klines_interval(self):
+    def get_df_binance_klines_interval(self):
         return pd.DataFrame(self.__client.get_klines(symbol=self.symbol, interval=self.interval, startTime = self.start_date, endTime = self.end_date))
+
+    def get_yfinance_data():
+        pass

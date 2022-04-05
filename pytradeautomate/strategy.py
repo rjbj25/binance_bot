@@ -33,6 +33,7 @@ class Strategy:
         ma100 = ta.SMA(df_klines['closed_price'].values, timeperiod=100)
         ma200 = ta.SMA(df_klines['closed_price'].values, timeperiod=200)
         ma50 = ta.SMA(df_klines['closed_price'].values, timeperiod=50)
+        ma20 = ta.SMA(df_klines['closed_price'].values, timeperiod=20)
         ema20 = ta.EMA(df_klines['closed_price'].values, timeperiod=20)
         slowk, slowd = ta.STOCH(df_klines['higest_price'].values, df_klines['lowest_price'].values, df_klines['closed_price'].values, fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
         macd, macdsignal, macdhist = ta.MACD(df_klines['closed_price'].values, fastperiod=12, slowperiod=26, signalperiod=9)
@@ -51,7 +52,7 @@ class Strategy:
             tendencia = self.get_tendencia(klines_4h)'''
             #if tendencia == 'Ascendente':
 
-            if macd[i] < 0 and macdsignal[i] < 0 and macd[i] > macdsignal[i] and not operation.status:
+            if ma20[i] > ma200[i] and macd[i] < 0 and macdsignal[i] < 0 and macd[i] > macdsignal[i] and not operation.status:
                 self.bac_account = operation.buy(self.bac_account.account_balance, df_klines['closed_price'][i], self.bac_account)
                 print(f'{date} - {df_klines[4][i]} - {ma50[i]} - {ma200[i]}')
                 print(self.bac_account)
@@ -131,9 +132,9 @@ if __name__ == "__main__":
     feed = fd(symbol=symbol, interval=interval, limit=limit)
     feed.start_date = datetime.datetime.now() - datetime.timedelta(days=60)
     feed.start_date = int(feed.start_date.timestamp()*1000)
-    feed.end_date = datetime.datetime.now() - datetime.timedelta(days=50)
+    feed.end_date = datetime.datetime.now() - datetime.timedelta(days=1)
     feed.end_date = int(feed.end_date.timestamp()*1000)
-    st = Strategy('BTCBUSD', feed.get_Client(), feed.get_df_klines_interval())
+    st = Strategy(symbol, feed.get_Client(), feed.get_df_binance_klines_interval())
     st.backtestBB(20, 2, 0)
 
 
