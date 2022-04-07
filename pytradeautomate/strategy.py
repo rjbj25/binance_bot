@@ -20,22 +20,27 @@ class Strategy:
         self.last_price = 0
         self.current_price = 0
         
-    def backtestInfinitGrid(self,percent,grid):
+    def backtestInfinitGrid(self,percent,grid,capital,cap_crypto, op_list, last_price):
         operation = op(self.symbol)
+        self.last_price = last_price
+
+        if len(op_list[0]) > 0:
+            operation.operation_list = op_list[0]
+            operation.operation_amount_list = op_list[1]
+        self.bac_account.account_balance = capital
+        self.bac_account.account_balance_crypto = cap_crypto
         df_klines = pd.DataFrame(self.klines)
         df_klines['closed_price'] = df_klines.apply(lambda x: float(x[4]) ,axis=1)
         df_klines['lowest_price'] = df_klines.apply(lambda x: float(x[3]) ,axis=1)
         df_klines['higest_price'] = df_klines.apply(lambda x: float(x[2]) ,axis=1)
         buy_operation = 0
         sell_operation = 0
-        qtysold = 0
 
 
         for i in df_klines.index:
             date = datetime.datetime.fromtimestamp(df_klines[0][i]/1000)
             sell_qty = self.check_operation_list(operation.operation_list, operation.operation_amount_list, df_klines['closed_price'][i])
-            #print(sell_qty)
-            if i == 0:
+            if i == 0 and len(op_list[0]) == 0:
                 print(f'Last price: {self.last_price}')
                 buyQty = self.bac_account.account_balance * percent
                 self.bac_account = operation.buy(buyQty, df_klines['closed_price'][i], self.bac_account)
@@ -46,34 +51,39 @@ class Strategy:
                 operation.operation_amount_list.append(operation.get_operation_balance())
                 print(f"Fecha: {date} - Precio de cierre: {df_klines['closed_price'][i]} - Balance de cuenta: {self.bac_account.account_balance} - Operacion: Primera compra - Ultima operacion: {self.last_price} - Cantidad vendida en BUSD: {buyQty}")
                 print(f'Cantidad disponible en crypto: {self.bac_account.account_balance_crypto}')
-            elif df_klines['closed_price'][i] < self.last_price - (self.last_price * grid) and self.bac_account.account_balance > 10:
+            elif df_klines['lowest_price'][i] < self.last_price - (self.last_price * grid) and self.bac_account.account_balance > 10:
                 print(f'Last price: {self.last_price}')
                 buyQty = self.bac_account.account_balance * percent
-                self.bac_account = operation.buy(buyQty, df_klines['closed_price'][i], self.bac_account)
-                self.last_price = df_klines['closed_price'][i]
+                self.bac_account = operation.buy(buyQty, df_klines['lowest_price'][i], self.bac_account)
+                self.last_price = df_klines['lowest_price'][i]
                 self.bac_account.account_balance_crypto = operation.get_operation_balance() + self.bac_account.account_balance_crypto
                 buy_operation += 1
+                operation.operation_list.append(df_klines['closed_price'][i])
+                operation.operation_amount_list.append(operation.get_operation_balance())
                 print(f"Fecha: {date} - Precio de cierre: {df_klines['closed_price'][i]} - Balance de cuenta: {self.bac_account.account_balance} - Ultima operacion: {self.last_price} - Cantidad vendida en BUSD: {buyQty}")
                 print(f'Cantidad disponible en crypto: {self.bac_account.account_balance_crypto}')
-            elif self.bac_account.account_balance_crypto > 0 and df_klines['closed_price'][i] > self.last_price + (self.last_price * grid) and sell_qty is not None and len(sell_qty) > 0:
+            elif self.bac_account.account_balance_crypto > 0 and df_klines['higest_price'][i] > self.last_price + (self.last_price * grid) and sell_qty is not None and len(sell_qty) > 0:
                 print(f'Cantidad a vender en CRYPTO: {sell_qty[0]}')
-                self.bac_account = operation.sell(sell_qty[0], df_klines['closed_price'][i], self.bac_account)
+                self.bac_account = operation.sell(sell_qty[0], df_klines['higest_price'][i], self.bac_account)
                 self.bac_account.account_balance_crypto = self.bac_account.account_balance_crypto - sell_qty[0]
                 sell_operation += 1
                 operation.operation_list.pop(sell_qty[2])
                 operation.operation_amount_list.pop(sell_qty[2])
-                print(f"Fecha: {date} - Precio de cierre: {df_klines['closed_price'][i]} - Balance de cuenta: {self.bac_account.account_balance} - Balance crypto: {self.bac_account.account_balance_crypto} - Operacion: Venta - Ultima operacion: {self.last_price}")
+                print(f"Fecha: {date} - Precio de cierre: {df_klines['higest_price'][i]} - Balance de cuenta: {self.bac_account.account_balance} - Balance crypto: {self.bac_account.account_balance_crypto} - Operacion: Venta - Ultima operacion: {self.last_price}")
                 print(f'Cantidad disponible en crypto: {self.bac_account.account_balance_crypto}')
             elif self.bac_account.account_balance < 10:
-                print(f"Sin fondos para realizar operaciones")
+                print(f"Fecha: {date} - Sin fondos para realizar operaciones de compra")
 
             
 
             self.current_price = df_klines['closed_price'][i]
+        
         print(f"Fecha: {date} - Balance de cuenta: {self.bac_account.account_balance} - Balance de cuenta en crypto: {self.bac_account.account_balance_crypto} - Valor de crypto en BUSD {self.bac_account.account_balance_crypto * self.current_price}")
         print(f"Balance total actual {self.bac_account.account_balance + self.bac_account.account_balance_crypto * self.current_price}")
         print(f"Operaciones de compra: {buy_operation} - Operaciones de venta: {sell_operation}")
-        return self.bac_account.account_balance + self.bac_account.account_balance_crypto * self.current_price
+        print(f'Operaciones abiertas: {operation.operation_list}')
+        print(f'-----------------------------------------------------FIN CICLO------------------------------------------')
+        return [self.bac_account.account_balance, self.bac_account.account_balance_crypto, [operation.operation_list,operation.operation_amount_list], self.last_price]
 
 
     def check_operation_list(self, operation_list, operation_amount_list, current_price):
@@ -109,7 +119,6 @@ class Strategy:
         #Backtesting
         for i in df_klines.index:
             date = datetime.datetime.fromtimestamp(df_klines[0][i]/1000)
-            #if tendencia == 'Ascendente':
             if i > 3:
 
                 if  not operation.status and self.crossover(macd,macdsignal,i) and adx[i] > adx[i-1] and adx[i-1] > adx[i-2]:
@@ -129,16 +138,6 @@ class Strategy:
                         print(f"Win Operation at: {df_klines['closed_price'][i]}")
                         win_rate += 1
                     
-                '''
-                elif df_klines['closed_price'][i] <= operation.buyPrice and df_klines['lowest_price'][i] <= operation.buyPrice - (operation.buyPrice*0.003) and operation.status:
-                    self.bac_account = operation.sell(operation.get_operation_balance(), df_klines['closed_price'][i], self.bac_account)
-                    self.current_balance = self.bac_account.account_balance
-                    print(f'{date} - {df_klines[4][i]} - {stdup[i]} - {mean[i]} - {stddown[i]}')
-                    cnt_operations += 1
-                    loss_rate += 1
-                    print(f"Loss Operation: {df_klines['closed_price'][i] }")
-                '''
-            
             self.last_price = df_klines['closed_price'][i]
 
 
@@ -192,16 +191,19 @@ if __name__ == "__main__":
     interval = '5m'
     limit = 1000
     capital = 1000    
-    for i in range(10):
+    cap_crypto = 0
+    op_list = [[], []]
+    last_price = 0
+    for i in range(100):
         feed = fd(symbol=symbol, interval=interval, limit=limit)
-        feed.start_date = datetime.datetime.now() - datetime.timedelta(days=30-i*3)
-        #feed.start_date = datetime.datetime.now() - datetime.timedelta(days=3)
+        feed.start_date = datetime.datetime.now() - datetime.timedelta(days=300-i*3)
+        #feed.start_date = datetime.datetime.now() - datetime.timedelta(days=6)
         feed.start_date = int(feed.start_date.timestamp()*1000)
         feed.end_date = datetime.datetime.now() - datetime.timedelta(days=0)
         feed.end_date = int(feed.end_date.timestamp()*1000)
         st = Strategy(symbol, feed.get_Client(), feed.get_df_binance_klines_interval(), capital)
         #capital = st.backtestBB(20, 2, 0)
-        capital = st.backtestInfinitGrid(percent=0.05,grid=0.005)
+        capital, cap_crypto, op_list, last_price  = st.backtestInfinitGrid(percent=0.2, grid=0.04, capital=capital,cap_crypto=cap_crypto, op_list=op_list, last_price=last_price )
     
 
 
