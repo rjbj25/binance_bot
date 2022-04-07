@@ -3,6 +3,7 @@
 class BacktestAccount:
     def __init__(self, account_balance, account_currency):
         self.account_balance = account_balance
+        self.account_balance_crypto = 0
         self.account_currency = account_currency
 
     def __str__(self):

@@ -11,11 +11,11 @@ class Operation:
         self.__op_balance = 0
         self.buyPrice = 0
         self.stop_price = None
-
+        self.operation_list = []
+        self.operation_amount_list = []
 
     def buy(self, buyQty, buyPrice, bac_account):
         self.buyPrice = buyPrice
-        
         commision = buyQty * 0.001
         self.__op_balance = (buyQty - commision) / buyPrice
         print(f'A Buy operation has been executed of {self.__symbol} at {buyPrice}')
