@@ -194,9 +194,9 @@ if __name__ == "__main__":
     cap_crypto = 0
     op_list = [[], []]
     last_price = 0
-    for i in range(100):
+    for i in range(10):
         feed = fd(symbol=symbol, interval=interval, limit=limit)
-        feed.start_date = datetime.datetime.now() - datetime.timedelta(days=300-i*3)
+        feed.start_date = datetime.datetime.now() - datetime.timedelta(days=30-i*3)
         #feed.start_date = datetime.datetime.now() - datetime.timedelta(days=6)
         feed.start_date = int(feed.start_date.timestamp()*1000)
         feed.end_date = datetime.datetime.now() - datetime.timedelta(days=0)
